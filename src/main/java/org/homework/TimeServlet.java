@@ -14,7 +14,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
-@WebServlet(urlPatterns = {"/time"})
+@WebServlet("/time")
 public class TimeServlet extends HttpServlet {
 
     @Override
@@ -24,8 +24,16 @@ public class TimeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        String timezone = req.getParameter("timezone");
+        LocalDateTime now;
+
+        if (timezone == null || timezone.isBlank()) {
+            now = LocalDateTime.now(ZoneOffset.UTC);
+        } else {
+            now = LocalDateTime.now(ZoneId.of(timezone));
+        }
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        resp.getWriter().write(now.format(formatter) + " UTC");
+        resp.getWriter().write(now.format(formatter) + " " + (timezone == null ? "UTC" : timezone));
     }
 }
