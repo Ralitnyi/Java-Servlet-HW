@@ -84,14 +84,6 @@ src/
 - Checks if specified time zone exists
 - Returns "Invalid timezone" error for invalid zones
 
-## Development
-
-### For development with hot reload:
-The project is configured for automatic reloading when files change:
-- `WEB-INF/classes/` - changes in Java classes
-- `WEB-INF/lib/` - changes in dependencies
-- `WEB-INF/web.xml` - changes in configuration
-
 ### Class Structure:
 - **Servlet**: `org.homework.TimeServlet`
 - **Filter**: `org.homework.filter.TimezoneValidateFilter`
