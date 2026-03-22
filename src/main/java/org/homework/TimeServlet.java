@@ -1,6 +1,10 @@
 package org.homework;
 
 
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.templateresolver.FileTemplateResolver;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,17 +17,30 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @WebServlet("/time")
 public class TimeServlet extends HttpServlet {
 
+    private TemplateEngine engine;
+
     @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+    public void init() throws ServletException {
+        engine = new TemplateEngine();
+
+        FileTemplateResolver resolver = new FileTemplateResolver();
+        resolver.setPrefix("./src/templates/");
+        resolver.setSuffix(".html");
+        resolver.setTemplateMode("HTML5");
+        resolver.setOrder(engine.getTemplateResolvers().size());
+        resolver.setCacheable(false);
+        engine.addTemplateResolver(resolver);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("text/html");
+
         String timezone = req.getParameter("timezone");
         LocalDateTime now;
 
@@ -34,6 +51,14 @@ public class TimeServlet extends HttpServlet {
         }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        resp.getWriter().write(now.format(formatter) + " " + (timezone == null ? "UTC" : timezone));
+        Context context = new Context(
+                req.getLocale(),
+                Map.of(
+                        "time", now.format(formatter),
+                        "timezone", (timezone == null ? "UTC" : timezone)
+                )
+        );
+        engine.process("time", context, resp.getWriter());
+        resp.getWriter().close();
     }
 }
